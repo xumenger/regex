@@ -1,6 +1,6 @@
 # Regex
 
-语法：
+Syntax
 
 ```
 concatenation: abc     match "abc"
@@ -8,7 +8,7 @@ alternation: abc|def   match "abc" or "def"
 closure: a*            match "" or "a" or "aa" or "aaa" or "aaa..."
 ```
 
-BNF表示
+BNF
 
 ```
 re                 ::= alter
