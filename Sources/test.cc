@@ -9,6 +9,8 @@ int main()
     cout << "false = " << false << endl;
     cout << "true  = " << true << endl;
 
+    cout << match("aaaaa", ".*aaaa") << " = " << true << endl;
+
     cout << match("aab", ".*") << " = " << false << endl;
     cout << match("ab", ".*") << " = " << false << endl;
     cout << match("aa", "a*") << " = " << true << endl;
