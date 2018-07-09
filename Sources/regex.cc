@@ -1,29 +1,54 @@
 #include "regex.h"
 #include <iostream>
+#include <stack>
 
-bool matchCore(const char *str, const char *pattern)
+using namespace std;
+
+bool match(const char *string, const char *pattern)
 {
-    if('\0' == *str && '\0' == *pattern)
-        return true;
-    if('\0' != *str && '\0' == *pattern)
+    stack<char> S;
+
+    if(NULL == string || NULL == pattern)
         return false;
 
-    if('*' == *(pattern + 1)){
-        if(*pattern == *str || *pattern == '.')
-            return matchCore(str + 1, pattern) || matchCore(str + 1, pattern + 2);
-        else
-            return matchCore(str, pattern + 2);
+    char before = '\0';
+    while(true){
+        if('\0' == *string && '\0' == *pattern && S.size() == 0)
+            return true;
+        if('\0' != *string && '\0' == *pattern && S.size() == 0)
+            return false;
+        if('\0' != *pattern && '\0' == *string)
+            return false;
+
+        if(S.size() == 2){
+            char second = S.top();
+            S.pop();
+            char first = S.top();
+            S.pop();
+            if(first == *string || (('.' == first) && (*string == before))){
+                before = '\0';
+                string++;
+                S.push(first);
+                S.push(second);
+            }
+        }
+        else if('*' == *(pattern + 1)){
+           if(*pattern == *string || '.' == *pattern){
+               if('.' == *pattern)
+                   before = *string;
+               string ++;
+               S.push(*pattern);
+               S.push(*(pattern + 1));
+               pattern += 2;
+           }
+           else{
+               pattern += 2;
+           }
+        }
+        else if(*string == *pattern || '.' == *pattern){
+            string ++;
+            pattern ++;
+        }
     }
-    else if(*str == *pattern || *pattern == '.')
-        return matchCore(str + 1, pattern + 1);
-
-    return false;
-}
-
-bool match(const char *str, const char *pattern)
-{
-    if(NULL == str || NULL == pattern)
-        return false;
-    return matchCore(str, pattern);
 }
 
