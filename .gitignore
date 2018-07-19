@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Java
+*.class
+
+# Lua
+*.luac
+
+# Python
+*.pyc
+
+# Racket
+
