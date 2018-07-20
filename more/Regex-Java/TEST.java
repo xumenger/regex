@@ -1,6 +1,7 @@
 package lexical;
 
 import java.util.Scanner;
+import lexical.RE.*;
 
 public class TEST{
     //(a|b)(c|e) (a|b)*(c|e)
