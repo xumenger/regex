@@ -89,7 +89,7 @@ public class NFA{
     }
 
 
-    private void addNodetoNFA(NFANode node){
+    private void addNodeToNFA(NFANode node){
         if(null == nfa)
             return ;
         nfa.add(node);
@@ -174,10 +174,10 @@ public class NFA{
     //并操作
     public void parallel(NFA n2)
     {
-        Nfa n0 = new NFA();
+        NFA n0 = new NFA();
         n0.addNodeToNFA("S");
         n0.addStart("S");
-        NFANode n1 = this.getStart();
+        NFANode s1 = this.getStart();
         NFANode s2 = n2.getStart();
         n0.getStart().addEdge('\0', s1);
         n0.getStart().addEdge('\0', s2);
@@ -214,7 +214,7 @@ public class NFA{
         e.end = false;
         n.getStart().addEdge('\0', s);
         e.addEdge('\0', n.getEnd());
-        n.getStart.addEdge('\0', n.getEnd());
+        n.getStart().addEdge('\0', n.getEnd());
         for(NFANode node: this.nfa)
             n.addNodeToNFA(node);
         n.stateSort();
@@ -229,7 +229,7 @@ public class NFA{
         n.addNodeToNFA("S");
         n.addStart("S");
         n.addNodeToNFA("E");
-        n.addEND("E");
+        n.addEnd("E");
         n.addEdgeToState("S", c, "E");
         n.stateSort();
         return n;
@@ -248,7 +248,7 @@ public class NFA{
                 startNode = n;
         }
         for(Character c: s.toCharArray()){
-            if(startNode.hashPath(c))
+            if(startNode.hasPath(c))
                 startNode = startNode.desNode.get(startNode.edge.indexOf(c));
             else
                 return false;
@@ -266,7 +266,7 @@ public class NFA{
         NFA n1 = NFA.ins(c);
         NFANode node = n1.getStart();
 
-        System.out.println(node.hashPath(c));
+        System.out.println(node.hasPath(c));
         System.out.println(n1.match(String.valueOf(c)));
     }
 }

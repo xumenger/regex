@@ -24,7 +24,7 @@ public class RE{
 
     private boolean isCharacter(char c){
         char[] alp = Utils.alphetbet1.toCharArray();
-        for(int j=0; i<alp.length; j++){
+        for(int j=0; j<alp.length; j++){
             if(alp[j] == c)
                 return true;
         }
@@ -71,7 +71,7 @@ public class RE{
         StringTokenizer tokens = new StringTokenizer(expression, "()*|.", true);
         //阶段1:扫描符号串
         while(tokens.hasMoreTokens()){
-            String token = tokens.newToken();
+            String token = tokens.nextToken();
             if(token.charAt(0) == '|'){
                 //Process all * , . in the top of the operator stack
                 while(!operatorStack.isEmpty()
@@ -206,9 +206,9 @@ public class RE{
     private void makeDFA()
     {
         String preRE = pre();
-        long t0 = System.currentTimemillis();
+        long t0 = System.currentTimeMillis();
         NFA nfa = this.evaluateExpression(preRE);
-        long t1 = System.currentTimemillis();
+        long t1 = System.currentTimeMillis();
         this.dfa = new DFA(nfa);
         long t2 = System.currentTimeMillis();
         System.out.println("nfa:" + (t1-t0) + "ms");

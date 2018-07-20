@@ -2,7 +2,7 @@ package lexical;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Stacl;
+import java.util.Stack;
 
 import lexical.NFA.NFANode;
 
@@ -51,41 +51,42 @@ public class DFA
             }
             return false;
         }
+    }
 
-        public DFA()
-        {
-            dfa = new HashSet<>();
-        }
+    public DFA()
+    {
+        dfa = new HashSet<>();
+    }
 
-        public DFA(NFA nfa)
-        {
-            DFA dfa = new DFA();
-            //计算开始节点的闭包
-            NFANode s0 = nfa.getStart();
+    public DFA(NFA nfa)
+    {
+        DFA dfa = new DFA();
+        //计算开始节点的闭包
+        NFANode s0 = nfa.getStart();
 
-            HashSet<HashSet<NFANode>> result = new HashSet<>();
-            Stack<HashSet<NFANode>> Dstates = new Stack<>();
-            HashSet<NFANode> start = Utils.eClosure(s0);
-            Dstates.push(start);
-            dfa.addNodeToDFA(start);
+        HashSet<HashSet<NFANode>> result = new HashSet<>();
+        Stack<HashSet<NFANode>> Dstates = new Stack<>();
+        HashSet<NFANode> start = Utils.eClosure(s0);
+        Dstates.push(start);
+        dfa.addNodeToDFA(start);
 
-            while(!Dstates.isEmpty()){
-                HashSet<NFANode> currentNode = Dstates.pop();
-                //为DFA添加一个状态
-                for(char c: Utils.alphebet1.toCharArray()){
-                    HashSet<NFANode> T = Utils.eClosure(Utils.move(currentNode, c));    //2259ms -> 335ms
-                    if(!Utils.isResult(result, T)){
-                        Dstates.push(T);
-                        dfa.addNodeToDFA(T);
-                        result.add(T);
-                    }
-                    if(currentNode.size() > 0 && T.size() > 0)
-                        dfa.addEdgeToState(currentNode, c, T);
+        while(!Dstates.isEmpty()){
+            HashSet<NFANode> currentNode = Dstates.pop();
+            //为DFA添加一个状态
+            for(char c: Utils.alphetbet1.toCharArray()){
+                HashSet<NFANode> T = Utils.eClosure(Utils.move(currentNode, c));    //2259ms -> 335ms
+                if(!Utils.inResult(result, T)){
+                    Dstates.push(T);
+                    dfa.addNodeToDFA(T);
+                    result.add(T);
                 }
+                if(currentNode.size() > 0 && T.size() > 0)
+                    dfa.addEdgeToState(currentNode, c, T);
             }
         }
         this.dfa = dfa.dfa;
     }
+
 
     void addNodeToDFA(HashSet<NFANode> dstates)
     {
@@ -109,7 +110,7 @@ public class DFA
         if(null == this.dfa)
             return ;
         DFANode f = getNode(from);
-        DFANode t = getNode(t);
+        DFANode t = getNode(to);
         f.addEdge(edge, t);
     }
 
