@@ -18,11 +18,16 @@ copy from [https://github.com/earayu/Regex](https://github.com/earayu/Regex)
 编译
 
 ```
+cd Regex/lexical/
 javac *.java
 ```
 
 运行
 
 ```
-
+cd ..
+java lexical.TEST
 ```
+
+参考[使用java命令运行class文件提示“错误：找不到或无法加载主类“的问题分析](http://www.cnblogs.com/wangxiaoha/p/6293340.html)，处理lexical是因为有package的问题
+
