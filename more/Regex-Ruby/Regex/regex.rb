@@ -13,7 +13,6 @@ class FARule < Struct.new(:state, :character, :next_state)
 end
 
 
-
 class DFARulebook < Struct.new(:rules)
     def next_state(state, character)
         rule_for(state, character).follow
@@ -25,7 +24,14 @@ class DFARulebook < Struct.new(:rules)
 end
 
 
-# test
+class DFA < Struct.new(:current_state, :accept_states, :rulebook)
+    def accepting?
+        accept_states.include?(current_state)
+    end
+end
+
+
+print("## test DFARulebook\n")
 rulebook = DFARulebook.new([
     FARule.new(1, 'a', 2), FARule.new(1, 'b', 1),
     FARule.new(2, 'a', 2), FARule.new(2, 'b', 3),
@@ -33,3 +39,7 @@ rulebook = DFARulebook.new([
 ])
 p rulebook.next_state(1, 'a')
 p rulebook.next_state(1, 'b')
+
+print("\n## test DFA\n")
+p DFA.new(1, [1, 3], rulebook).accepting?
+p DFA.new(1, [3], rulebook).accepting?
