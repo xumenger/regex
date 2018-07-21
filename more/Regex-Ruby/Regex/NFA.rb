@@ -30,6 +30,16 @@ class NFA < Struct.new(:current_states, :accept_states, :rulebook)
     def accepting?
         (current_states & accept_states).any?
     end
+
+    def read_character(character)
+        self.current_states = rulebook.next_states(current_states, character)
+    end
+
+    def read_string(string)
+        string.chars.each do |character|
+            read_character(character)
+        end
+    end
 end
 
 
@@ -45,3 +55,12 @@ p rulebook.next_states(Set[1, 2], 'a')
 print("\n## test NFA\n")
 p NFA.new(Set[1], [4], rulebook).accepting?
 p NFA.new(Set[1, 2, 4], [4], rulebook).accepting?
+print("test read_string\n")
+nfa1 = NFA.new(Set[1], [4], rulebook)
+p nfa1.accepting?
+nfa1.read_character('b')
+p nfa1.accepting?
+nfa1.read_character('a')
+p nfa1.accepting?
+nfa1.read_character('b')
+p nfa1.accepting?
