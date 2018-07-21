@@ -1,4 +1,4 @@
-require './NFA.rb'
+require "./NFA.rb"
 
 # 语法类的实现 #to_s 和 Pattern#bracket 方法一起
 # 会在必要的时候自动插入()，这样在查看一棵语法树的简单字符表示时，也可以知道它的结构信息
@@ -13,6 +13,11 @@ module Pattern
 
     def inspect
         "/#{self}/"
+    end
+
+    # 把 #to_nfa_design 封装进 #match? 方法，让模式有更友好的接口
+    def match?(string)
+        to_nfa_design.accepts?(string)
     end
 end
 
@@ -56,6 +61,7 @@ class Literal < Struct.new(:character)
         rulebook = NFARulebook.new([rule])
 
         NFADesign.new(start_state, [accept_state], rulebook)
+    end
 end
 
 
