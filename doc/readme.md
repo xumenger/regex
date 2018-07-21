@@ -13,3 +13,4 @@
 * [正则表达式与有穷自动机的联系？](https://www.zhihu.com/question/23867934)
 * [简单的正则表达式引擎](https://blog.csdn.net/u012637838/article/details/41245613)
 * [正规式->最小化DFA说明](http://www.cnblogs.com/cute/p/4021689.html)
+* [可移植的 Scheme 正则表达式库 pregexp.scm 文档翻译](https://www.cnblogs.com/zh-geek/p/6263026.html)
