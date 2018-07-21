@@ -30,3 +30,5 @@
 
 ; test
 (reg-match '("a" ("b"*) (("c"?) or ("d"+))) "abbc" 0)
+(reg-match '(("a"*)) "aaaaaaaaa" 0)
+(reg-match '("a" ("b"*)) "abbbb" 0)
