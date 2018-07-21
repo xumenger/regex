@@ -39,3 +39,4 @@ rulebook_nil = NFARulebook.new([
     FARule.new(6, 'a', 4)
 ])
 p rulebook_nil.next_states(Set[1], nil)
+p rulebook_nil.follow_free_moves(Set[1])

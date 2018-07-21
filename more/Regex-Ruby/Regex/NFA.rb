@@ -22,6 +22,16 @@ class NFARulebook < Struct.new(:rules)
     def rules_for(state, character)
         rules.select { |rule| rule.applies_to?(state, character) }
     end
+
+    # 需要一些辅助代码帮助找到从一个特定集合的状态开始，通过自由移动所能到达的所有状态
+    def follow_free_moves(states)
+        more_states = next_states(states, nil)
+        if more_states.subset?(states)
+            states
+        else
+            follow_free_moves(states + more_states)
+        end
+    end
 end
 
 
