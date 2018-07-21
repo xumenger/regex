@@ -60,7 +60,7 @@ end
 # 就像我们在使用DFA 类时那样，可以很方便地使用一个NFADesign 对象根据需要自动产生一个NFA 实例
 # 而不是手工创建它们
 class NFADesign < Struct.new(:start_state, :accept_states, :rulebook)
-    def accepts(string)
+    def accepts?(string)
         to_nfa.tap { |nfa| nfa.read_string(string) }.accepting?
     end
 

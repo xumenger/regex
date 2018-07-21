@@ -24,9 +24,9 @@ p nfa1.accepting?
 
 print("\n## test NFADesign\n")
 nfa_design = NFADesign.new(1, [4], rulebook)
-p nfa_design.accepts('bab')
-p nfa_design.accepts('bbbbb')
-p nfa_design.accepts('bbabb')
+p nfa_design.accepts?('bab')
+p nfa_design.accepts?('bbbbb')
+p nfa_design.accepts?('bbabb')
 
 
 print("\ntest rulebook nil\n")
@@ -43,6 +43,6 @@ p rulebook_nil.follow_free_moves(Set[1])
 
 print("\n## test NFA free moves\n")
 nfa_design2 = NFADesign.new(1, [2, 4], rulebook_nil)
-p nfa_design2.accepts('aa')
-p nfa_design2.accepts('aaa')
+p nfa_design2.accepts?('aa')
+p nfa_design2.accepts?('aaa')
 
