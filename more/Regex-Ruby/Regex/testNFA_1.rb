@@ -27,3 +27,15 @@ nfa_design = NFADesign.new(1, [4], rulebook)
 p nfa_design.accepts('bab')
 p nfa_design.accepts('bbbbb')
 p nfa_design.accepts('bbabb')
+
+
+print("\ntest rulebook nil\n")
+rulebook_nil = NFARulebook.new([
+    FARule.new(1, nil, 2), FARule.new(1, nil, 4),
+    FARule.new(2, 'a', 3),
+    FARule.new(3, 'a', 2),
+    FARule.new(4, 'a', 5),
+    FARule.new(5, 'a', 6),
+    FARule.new(6, 'a', 4)
+])
+p rulebook_nil.next_states(Set[1], nil)
