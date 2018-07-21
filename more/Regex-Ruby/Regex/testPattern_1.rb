@@ -22,3 +22,7 @@ p nfa_design1.accepts?('a')
 nfa_design2 = Literal.new('a').to_nfa_design
 p nfa_design2.accepts?('a')
 p nfa_design2.accepts?('b')
+
+print("\n## 3\n")
+p Empty.new.matches?('a')
+p Literal.new('a').matches?('a')

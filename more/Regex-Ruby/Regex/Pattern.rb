@@ -16,7 +16,7 @@ module Pattern
     end
 
     # 把 #to_nfa_design 封装进 #match? 方法，让模式有更友好的接口
-    def match?(string)
+    def matches?(string)
         to_nfa_design.accepts?(string)
     end
 end
