@@ -1,0 +1,29 @@
+require "./NFA.rb"
+
+print("## test NFARulebook\n")
+rulebook = NFARulebook.new([
+    FARule.new(1, 'a', 1), FARule.new(1, 'b', 1), FARule.new(1, 'b', 2),
+    FARule.new(2, 'a', 3), FARule.new(2, 'b', 3),
+    FARule.new(3, 'a', 4), FARule.new(3, 'b', 4)
+])
+p rulebook.next_states(Set[1], 'b')
+p rulebook.next_states(Set[1, 2], 'a')
+
+print("\n## test NFA\n")
+p NFA.new(Set[1], [4], rulebook).accepting?
+p NFA.new(Set[1, 2, 4], [4], rulebook).accepting?
+print("test read_string\n")
+nfa1 = NFA.new(Set[1], [4], rulebook)
+p nfa1.accepting?
+nfa1.read_character('b')
+p nfa1.accepting?
+nfa1.read_character('a')
+p nfa1.accepting?
+nfa1.read_character('b')
+p nfa1.accepting?
+
+print("\n## test NFADesign\n")
+nfa_design = NFADesign.new(1, [4], rulebook)
+p nfa_design.accepts('bab')
+p nfa_design.accepts('bbbbb')
+p nfa_design.accepts('bbabb')
