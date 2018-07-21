@@ -41,4 +41,4 @@
 *.pyc
 
 # Racket
-
+*.rkt~
