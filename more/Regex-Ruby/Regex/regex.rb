@@ -41,6 +41,18 @@ class DFA < Struct.new(:current_state, :accept_states, :rulebook)
 end
 
 
+class DFADesign < Struct.new(:start_state, :accept_states, :rulebook)
+    def to_dfa
+        DFA.new(start_state, accept_states, rulebook)
+    end
+
+    def accepts?(string)
+        # tap 方法对一个代码块求值，然后返回调用它的对象
+        to_dfa.tap{ |dfa| dfa.read_string(string) }.accepting?
+    end
+end
+
+
 print("## test DFARulebook\n")
 rulebook = DFARulebook.new([
     FARule.new(1, 'a', 2), FARule.new(1, 'b', 1),
@@ -63,3 +75,8 @@ dfa2 = DFA.new(1, [3], rulebook)
 p dfa2.accepting?
 dfa2.read_string("aaaaaaaaaaaaab")
 p dfa2.accepting?
+
+print("\n## test DFADesign\n")
+dfa_design = DFADesign.new(1, [3], rulebook)
+p dfa_design.accepts?('a')
+p dfa_design.accepts?("babababa")
