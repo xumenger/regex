@@ -32,6 +32,12 @@ class DFA < Struct.new(:current_state, :accept_states, :rulebook)
     def read_character(character)
         self.current_state = rulebook.next_state(current_state, character)
     end
+
+    def read_string(string)
+        string.chars.each do |character|
+            read_character(character)
+        end
+    end
 end
 
 
@@ -47,7 +53,13 @@ p rulebook.next_state(1, 'b')
 print("\n## test DFA\n")
 p DFA.new(1, [1, 3], rulebook).accepting?
 p DFA.new(1, [3], rulebook).accepting?
-dfa = DFA.new(1, [3], rulebook)
-p dfa.accepting?
-dfa.read_character('b')
-p dfa.accepting?
+print("read_character\n")
+dfa1 = DFA.new(1, [3], rulebook)
+p dfa1.accepting?
+dfa1.read_character('b')
+p dfa1.accepting?
+print("read_string\n")
+dfa2 = DFA.new(1, [3], rulebook)
+p dfa2.accepting?
+dfa2.read_string("aaaaaaaaaaaaab")
+p dfa2.accepting?
