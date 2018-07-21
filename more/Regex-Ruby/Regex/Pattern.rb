@@ -1,3 +1,5 @@
+require './NFA.rb'
+
 # 语法类的实现 #to_s 和 Pattern#bracket 方法一起
 # 会在必要的时候自动插入()，这样在查看一棵语法树的简单字符表示时，也可以知道它的结构信息
 module Pattern
@@ -25,6 +27,14 @@ class Empty
     def precedence
         3
     end
+
+    def to_nfa_design
+        start_state = Object.new
+        accept_states = [start_state]
+        rulebook = NFARulebook.new([])
+
+        NFADesign.new(start_state, accept_states, rulebook)
+    end
 end
 
 
@@ -38,6 +48,14 @@ class Literal < Struct.new(:character)
     def precedence
         3
     end
+
+    def to_nfa_design
+        start_state = Object.new
+        accept_state = Object.new
+        rule = FARule.new(start_state, character, accept_state)
+        rulebook = NFARulebook.new([rule])
+
+        NFADesign.new(start_state, [accept_state], rulebook)
 end
 
 
