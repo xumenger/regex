@@ -40,3 +40,9 @@ rulebook_nil = NFARulebook.new([
 ])
 p rulebook_nil.next_states(Set[1], nil)
 p rulebook_nil.follow_free_moves(Set[1])
+
+print("\n## test NFA free moves\n")
+nfa_design2 = NFADesign.new(1, [2, 4], rulebook_nil)
+p nfa_design2.accepts('aa')
+p nfa_design2.accepts('aaa')
+
