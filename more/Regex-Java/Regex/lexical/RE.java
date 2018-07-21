@@ -11,18 +11,23 @@ import java.util.StringTokenizer;
 public class RE{
     private String re;
     private DFA dfa;
-    private String escape = "A.*|()\\+?";   //为了让转义的第一个字符索引为1，添上个A（A不转意，所以无所谓）
+    private String escape = "A.*|()\\+?";   //为了让转义的第一个字符索引为1，添上个A（A不转义，所以无所谓）
 
-    public RE(String s){
+    public RE(String s)
+    {
         re = s;
         makeDFA();
     }
 
-    public String getRE(){
+
+    public String getRE()
+    {
         return re;
     }
 
-    private boolean isCharacter(char c){
+
+    private boolean isCharacter(char c)
+    {
         char[] alp = Utils.alphetbet1.toCharArray();
         for(int j=0; j<alp.length; j++){
             if(alp[j] == c)
@@ -31,8 +36,10 @@ public class RE{
         return false;
     }
 
+
     //将正则表达式转义
-    private String escapeRE(String s){
+    private String escapeRE(String s)
+    {
         for(int i=1; i<s.length(); i++){
             if(s.charAt(i-1)=='\\' &&
 					(	s.charAt(i)=='.'|| s.charAt(i)=='|' || s.charAt(i)=='*'
@@ -49,7 +56,9 @@ public class RE{
         return s;
     }
 
-    private String addDot(String re){
+
+    private String addDot(String re)
+    {
         StringBuffer sb = new StringBuffer();
         sb.append(re.charAt(0));
         for(int i=1; i<re.length(); i++){
@@ -63,7 +72,9 @@ public class RE{
         return sb.toString();
     }
 
-    private String infixToPostfix(String expression){
+
+    private String infixToPostfix(String expression)
+    {
         StringBuffer postfix = new StringBuffer();
         //存储操作符的栈
         Stack<Character> operatorStack = new Stack<Character>();
@@ -116,7 +127,8 @@ public class RE{
     }
 
 
-    private NFA evaluateExpression(String postfix){
+    private NFA evaluateExpression(String postfix)
+    {
         //创建一个操作数栈来存储操作数
         Stack<NFA> operandStack = new Stack<NFA>();
         //分离操作数与操作符
@@ -142,7 +154,8 @@ public class RE{
 
 
     //处理一次双目运算符运算
-    private void processAnOperator(Stack<NFA> operandStack, char c){
+    private void processAnOperator(Stack<NFA> operandStack, char c)
+    {
         NFA op1 = operandStack.pop();    //操作数1
         NFA op2 = operandStack.pop();    //操作数2
         if(c == '|'){   //connect运算
@@ -217,7 +230,8 @@ public class RE{
 
 
     //要匹配的表达式没有闭包、连接和或运算，所以遇到这些字符直接转义，然后模拟DFA进行匹配
-    public boolean match(String s){
+    public boolean match(String s)
+    {
         for(int i=0; i<s.length(); i++){
             if(s.charAt(i)=='.'|| s.charAt(i)=='|' || s.charAt(i)=='*'
 					|| s.charAt(i)=='(' || s.charAt(i)==')' || s.charAt(i)=='\\'
@@ -233,11 +247,15 @@ public class RE{
         return dfa.match(s);
     }
 
-    public boolean contains(String s){
+
+    public boolean contains(String s)
+    {
         return dfa.contains(s);
     }
 
-    public int search(String s){
+
+    public int search(String s)
+    {
         return dfa.search(s);
     }
 }

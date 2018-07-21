@@ -7,8 +7,10 @@ import java.util.ArrayList;
  * 可以看成一张加权有向图
  */
 public class NFA{
+    // 存储所有的NFA节点，非确定有限状态机每个节点存储的是所有可能的状态
     private ArrayList<NFANode> nfa;
 
+    // NFA节点的个数
     public int size()
     {
         return nfa.size();
@@ -21,7 +23,7 @@ public class NFA{
         ArrayList<Character> edge;
         ArrayList<NFANode> desNode;
         boolean start;    //true则为开始状态
-        boolean end;
+        boolean end;      //true则为结束状态
 
         NFANode(String state)
         {
@@ -32,12 +34,14 @@ public class NFA{
             end = false;
         }
 
+        // 添加边
         void addEdge(Character s, NFANode d)
         {
             edge.add(s);
             desNode.add(d);
         }
 
+        // 判断是不是有 c 这条边
         boolean hasPath(char c)
         {
             for(Character x: edge){
@@ -80,7 +84,8 @@ public class NFA{
         getNode(s).end = true;
     }
 
-    //添加状态名为s的状态之NFA
+
+    //添加状态名为 s 的状态至NFA
     private void addNodeToNFA(String s)
     {
         if(null == nfa)
@@ -96,6 +101,7 @@ public class NFA{
     }
 
 
+    // 状态 state 通过边 edge 指向 des
     private void addEdgeToState(String state, Character edge, String des)
     {
         if(null == this.nfa)
@@ -163,6 +169,7 @@ public class NFA{
         }
         NFANode n = getEnd();
         n.end = false;
+        // 添加 n 指向 n2 的起点的 【自由移动】
         n.addEdge('\0', n2.getStart());
         n2.getStart().start = false;
         for(NFANode node: n2.nfa)
@@ -222,7 +229,7 @@ public class NFA{
     }
 
 
-    //生成一个NFA实例，他有一个开始状态、一个终结状态、一条输入字符为c的边
+    //生成一个NFA实例，它有一个开始状态、一个终结状态、一条输入字符为c的边
     public static NFA ins(Character c)
     {
         NFA n = new NFA();
