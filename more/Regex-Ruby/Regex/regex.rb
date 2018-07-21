@@ -28,6 +28,10 @@ class DFA < Struct.new(:current_state, :accept_states, :rulebook)
     def accepting?
         accept_states.include?(current_state)
     end
+
+    def read_character(character)
+        self.current_state = rulebook.next_state(current_state, character)
+    end
 end
 
 
@@ -43,3 +47,7 @@ p rulebook.next_state(1, 'b')
 print("\n## test DFA\n")
 p DFA.new(1, [1, 3], rulebook).accepting?
 p DFA.new(1, [3], rulebook).accepting?
+dfa = DFA.new(1, [3], rulebook)
+p dfa.accepting?
+dfa.read_character('b')
+p dfa.accepting?
