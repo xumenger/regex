@@ -471,9 +471,46 @@ struct context
     // Clone thread t and set state index, the put it into pending_threads
     thread * clone_to_pending_threads(const thread *t, int state_index)
     {
-    
+        auto tn = alloc_thread(t == nullptr);
+        pending_tlist.push_front(tn);
+        tn->state_index = state_index;
+
+        if(t)
+            tn->inherit_from(t);
+        return tn;
     }
+
+    // Pending all epsilon extend states into pending_states
+    void pending_epsilon_extend_states(int c, thread *t)
+    {
+        const std::vector<int> &indices = espilon_extend_states[c];
+        for(auto v : indices)
+        {
+            if(!epsilon_bits.is_set(v))
+            {
+                epsilon_bits.set(v);
+                pending_states.emplace_back(v, t);
+            }
+        }
+    }
+
+    context(const states_data &sd,
+            const vertex_extend_states &ees,
+            const char *begin,
+            const char *end)
+        : repeat_count(sd.repeat_count),
+          capture_count(sd.capture_count),
+          epsilon_bits(ees.size()),
+          sbegin(begin), send(end),
+          spos(begin), scur(begin)
+    {
+    }
+
+    context(const context &) = delete;
+    void operator = (const context &) = delete;
 };
+
+
 }
 
 #endif
