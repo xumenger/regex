@@ -510,7 +510,299 @@ struct context
     void operator = (const context &) = delete;
 };
 
+class regex
+{
+    typedef std::map<std::string, std::vector<char_range>> char_classes;
+public:
+    explicit regex(const std::string &re)
+        : re_(std::string(padding_size_, ' ') + re),
+          states_(re_.size() + 1, state_none),
+          states_data_(re.size() + 1),
+          epsilon_(re_.size() + 1),
+          accept_state_(re_.size())
+    {
+        prepare_padding_states();
+        construct_states();
+        construct_epsilon_extend();
+    }
 
+    regex(const regex &) = delete;
+    void operator = (const regex &) = delete;
+
+    const std::string& pattern() const
+    {
+        return re_;
+    }
+
+    bool match(const std::string &str, match_result *match_res = nullptr) const
+    {
+        auto begin = str.c_str();
+        auto end = begin + str.size();
+        return match(begin, end, match_res);
+    }
+
+    bool match(const char *begin, const char *end, match_result *match_res = nullptr) const
+    {
+        return match_search(begin, end, match_res, false);
+    }
+
+    bool search(const char *begin, const char *end, match_result *match_res) const
+    {
+        return match_search(begin, end, match_res, true);
+    }
+
+private:
+    bool match_search(const char *begin, const char *end,
+            match_result *match_res, bool search) const
+    {
+        if(context_)
+            context_->reset(begin, end);
+        else
+            context_.reset(new context(state_data_,
+                                       epsilon_extend_states, begin, end));
+        context &ctx = *context_;
+        
+        if(search)
+        {
+            for(; ctx.spos != cts.send; ++ctx.spos)
+            {
+                ctx.scur = ctx.spos;
+                init_context_tlist(ctx);
+                for(; !ctx.tlist.empty() && ctx.scur != ctx.send; ++ctx.scur)
+                {
+                    run_threads(ctx);
+                    if(ctx.accept)
+                        break;
+                }
+                
+                if(ctx.accept)
+                    break;
+            }
+        }
+        else
+        {
+            init_context_tlist(ctx);
+
+            for(; ctx.scur != ctx.send; ++ctx.scur)
+            {
+                ctx.accept = false;
+                run_threads(ctx);
+            }
+        }
+
+        if(match_res)
+        {
+            if(ctx.accept)
+                match_res->captures_swap(ctx.accept_captures);
+            else
+                match_res->captures_.resize(ctx.capture_count);
+        }
+
+        return ctx.accept;
+    }
+
+    void run_threads(context &ctx) const
+    {
+        for(auto t = ctx.tlist.front(); t != ctx.tlist.tail(); )
+        {
+            ctx.current_thread = t;
+            auto c = t->state_index;
+            // Move to next first, because move_to_next may split
+            // the t from the tlist
+            t = t->next;
+            switch(states_[c])
+            {
+                case state_char:
+                    if(static_cast<unsigned char>(*ctx.scur) == states_data_.data[c].c)
+                        move_to_next(ctx, c);
+                    break;
+                case state_dot:
+                    if(*ctx.scur != '\n')
+                        move_to_next(ctx, c);
+                    break;
+                case state_match_range:
+                    if(match_range(*ctx.scur, c))
+                        move_to_next(ctx, c);
+                    break;
+                case state_exclude_range:
+                    if(!match_range(*ctx.scur, c))
+                        move_to_next(ctx, c);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        ctx.tlist.swap(ctx.next_tlist);
+        ctx.free_thread_list(ctx.next_tlist);
+    }
+
+    bool match_range(unsigned char c, int s) const
+    {
+        int begin = states_data_.data[s].char_range_begin;
+        int end = states_data_.data[s].char_range_end;
+
+        for(int i = begin; i < end; i++)
+        {
+            const auto &range = states_data_.char_ranges[i];
+            if(c >= range.first && c <= range.last)
+                return true;
+        }
+
+        return false;
+    }
+
+    void init_context_tlist(context &ctx) const
+    {
+        ctx.epsilon_bits.clear();
+        ctx.pending_epsilon_extend_states(state_of_begin_, nullptr);
+        generate_tlist(ctx, ctx.tlist, true);
+    }
+
+    void move_to_next(context &ctx, int v) const
+    {
+        ctx.epsilon_bits.clear();
+        branch_to_next(ctx, v, ctx.current_thread);
+        generate_tlist(ctx, ctx.next_tlist, false);
+    }
+
+    void generate_tlist(context &ctx, thread_list &tlist, bool init) const
+    {
+        int it = 0;
+        int end = ctx.pending_states.size();
+        while(it < end)
+        {
+            for(; it < end; it++)
+            {
+                auto c = ctx.pending_states[it].first;
+                auto t = ctx.pending_states[it].second;
+                auto s = states_[c];
+                switch(s)
+                {
+                    case state_none:
+                        break;
+                    
+                    case state_branch:
+                    {
+                        if(!t)
+                        {
+                            t = ctx.alloc_thread(true);
+                            ctx.pending_tlist.push_front(t);
+                        }
+                        t->state_index = c;
+                        branch_to_next(ctx, c, t);
+                        break;
+                    }
+
+                    case state_repeat:
+                    {
+                        assert(t);
+                        // Increase repeat times
+                        auto index = states_data_.data[c].index;
+                        auto times = t->repeat_times[index] + 1;
+                        auto need_repeat = times < states_data_.data[c].max;
+                        auto need_move_next = times >= states_data_.data[c].min && times <= states_data_.data[c].max;
+
+                        // Less than max, repeat it again
+                        if(need_repeat)
+                        {
+                            thread *tb = nullptr;
+                            if(need_move_next)
+                                tb = ctx.clone_to_pending_threads(t, c);
+                            else
+                            {
+                                t->state_index = c;
+                                tb = t;
+                            }
+                            tb->repeat_times[index] = times;
+
+                            // Clear all repeat states counter in range [b, c)
+                            auto b = states_data_.data[c].repeat_begin;
+                            for(auto i = b; i < c; i++)
+                            {
+                                if(states_[i] == state_repeat)
+                                    tb->repeat_times[states_data_.data[i].index] = 0;
+                            }
+
+                            ctx.pending_epsilon_extend_states(b, tb);
+                        }
+
+                        // Move to next state when repeat times in range [min, max]
+                        if(need_move_next)
+                        {
+                            t->state_index = c;
+                            t->repeat_times[index] = times;
+                            branch_to_next(ctx, c, t);
+                        }
+                        break;
+                    }
+
+                    case state_capture_begin:
+                    case state_predict_begin:
+                    case state_reverse_predict_begin:
+                    {
+                        if(!t)
+                        {
+                            t = ctx.alloc_thread(true);
+                            ctx.pending_tlist.push_front(t);
+                        }
+                        t->state_index = c;
+                        if(s == state_capture_begin)
+                        {
+                            // Update capture data
+                            auto index = states_data_.data[c].capture_num;
+                            t->captures[index].begin = init ? ctx.spos : ctx.scur + 1;
+                        }
+                        else if(s == state_predict_begin)
+                        {
+                            // Update predict
+                            t->predict.begin = init ? ctx.spos : ctx.scur + 1;
+                        }
+                        else
+                        {
+                            // Update reverse predict
+                            t->reverse_predict.begin = init ? ctx.spos : ctx.scur + 1;
+                        }
+
+                        branch_to_next(ctx, c, t);
+                        break;
+                    }
+
+                    case state_capture_end:
+                    {
+                        assert(t);
+                        auto from_state = states_[t->state_index];
+                        t->state_index = c;
+
+                        // Update capture data
+                        auto index = states_data_.data[c].capture_num;
+                        if(from_state == state_capture_begin)
+                            t->captures[index].end = t->captures[index].begin;
+                        else
+                            t->captures[index].end = ctx.scur + 1;
+
+                        // The accept_state_ is last state_capture_end
+                        // If c is accept_state_, then do not move to
+                        // next state
+                        if(c != accept_state_)
+                        {
+                            branch_to_next(ctx, c, t);
+                        }
+                        else if(!ctx.accept)
+                        {
+                            ctx.accept = true;
+                            ctx.accept_captures.assign(t->captures, t->captures + t->capture_num);
+                            // Set predict begin to accept_captures[0].end
+                            // when predict success
+                            if(t->predict.begin)
+                                ctx.accept_captures[0].end = t->predict.begin;
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
 }
 
 #endif
